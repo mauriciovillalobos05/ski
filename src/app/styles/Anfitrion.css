@@ -1,0 +1,139 @@
+.dashboard-container {
+  min-height: 100vh;
+  background: #756F57; 
+  padding: 0; /* quitamos padding */
+  font-family: 'Courier New', Courier, monospace;
+  color: #fff9f0;
+}
+
+
+.top-bar {
+  position: sticky;
+  top: 0;
+  width: 100%;
+  background: #C1A075;
+  padding: 15px 30px;
+  border-radius: 0; 
+  margin: 0; 
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 10;
+  border: 2px solid black;
+}
+
+.logout-button {
+  background: #5A3825;
+  display: flex;
+  justify-content: space-between;
+  border: none;
+  padding: 8px 50px;
+  color: white;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.3s;
+  margin-right: 5%;
+}
+
+.logout-button:hover {
+  background: #3e2618;
+}
+
+.dashboard-title {
+  font-size: 2rem;
+  margin: 20px 0;
+  text-align: center;
+  color: #fff9f0;
+}
+
+.loading-text, .no-terrazas-text {
+  text-align: center;
+  color: #d2b48c;
+  margin-top: 30px;
+  font-size: 1.2rem;
+}
+
+.terraza-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  justify-content: center;
+  padding: 20px;
+}
+
+.terraza-card {
+  width: 300px;
+  background: #fff9f0;
+  border: 2px solid #8B4513;
+  border-radius: 15px;
+  overflow: hidden;
+  box-shadow: 0 4px 8px rgba(139, 69, 19, 0.3);
+  transition: transform 0.3s;
+  display: flex;
+  flex-direction: column;
+}
+
+.terraza-card:hover {
+  transform: scale(1.05);
+}
+
+.terraza-image {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+}
+
+.terraza-placeholder {
+  width: 100%;
+  height: 200px;
+  background: #d2b48c;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #5A3825;
+  font-weight: bold;
+  font-size: 1.2rem;
+}
+
+.terraza-info {
+  padding: 15px;
+}
+
+.terraza-name {
+  font-size: 1.5rem;
+  margin-bottom: 10px;
+  color: #5A3825;
+}
+
+.terraza-description {
+  font-size: 1rem;
+  color: #8B6E46;
+  margin-bottom: 10px;
+}
+
+.terraza-price {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #5A3825;
+}
+
+.upload-button-container {
+  margin-top: 30px;
+  display: flex;
+  justify-content: center;
+}
+
+.upload-button {
+  background: #8B4513;
+  border: none;
+  padding: 12px 24px;
+  color: white;
+  font-size: 1rem;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.upload-button:hover {
+  background: #5A3825;
+}
