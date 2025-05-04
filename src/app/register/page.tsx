@@ -1,11 +1,19 @@
-"use client";
+'use client';
 
 import Link from "next/link";
 import { useState, useEffect } from "react";
 
 export default function Register() {
-  const [registered, setRegistered] = useState(false)
-  const [emailVerified, setEmailVerified] = useState(false);
+  const [registered, setRegistered] = useState(false);
+  const [emailVerified, setEmailVerified] = useState(true);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+    setEmailVerified(false);
+  }, []);
+
+  if (!mounted) return null; 
 
   return (
     <>

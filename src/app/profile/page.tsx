@@ -48,9 +48,11 @@ export default function Profile() {
         </div>
 
         <div className="flex justify-end mb-6">
-          <button className="bg-blue-700 text-white font-bold py-2 px-4 rounded-full shadow hover:bg-blue-800 transition">
-            IR AL RODEO
-          </button>
+          <Link href="cliente/dashboard">
+            <button className="bg-blue-700 text-white font-bold py-2 px-4 rounded-full shadow hover:bg-blue-800 transition">
+              IR AL RODEO
+            </button>
+          </Link>
         </div>
       </div>
     </div>
