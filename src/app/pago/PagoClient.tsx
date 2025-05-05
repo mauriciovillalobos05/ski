@@ -3,6 +3,7 @@
 import { useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 import Navbar from "@/app/components/Navbar";
+import Kueski_button from '@/app/components/kueski/kueski_button'
 
 const PagoClient = () => {
   const searchParams = useSearchParams();
@@ -40,12 +41,8 @@ const PagoClient = () => {
               <p className="text-lg text-[#794645] mb-2">$1500</p>
               <p className="text-md text-[#794645] mb-4">{fechaFormateada}</p>
 
-              <button
-                onClick={() => alert('Conectar con Kueski Pay aquí')}
-                className="bg-[#D9CACF] px-6 py-3 rounded-full text-black hover:opacity-90 transition text-lg"
-              >
-                Pagar con Kueski
-              </button>
+              {/* Boton para pagar con kueski */}
+              <Kueski_button />
             </div>
           </div>
         </div>
