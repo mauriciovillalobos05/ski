@@ -7,7 +7,7 @@ const Dashboard: React.FC = () => {
     <div className="min-h-screen bg-[#c18f54]">
       <Navbar />
       <h1 className="text-5xl md:text-4xl font-serif mb-8 text-brown-3text-5xl md:text-4xl font-serif mb-5 text-[#2D2429] px-10">
-        ÚNETE AL RODEO
+        PONLE UBICACIÓN AL RODEO
       </h1>
       <main className="flex justify-center items-center mt-16">
         <div className="bg-[#d4d2d5] w-96 rounded-2xl shadow-xl p-4">

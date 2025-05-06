@@ -10,7 +10,7 @@ export default function Register() {
 
   useEffect(() => {
     setMounted(true);
-    setEmailVerified(false);
+    setEmailVerified(true);
   }, []);
 
   if (!mounted) return null; 
@@ -87,7 +87,7 @@ export default function Register() {
           </div>
           {emailVerified ? (
             <Link href="/profile">
-              <button className="bg-blue-700 text-white font-bold py-2 px-4 rounded-full shadow hover:bg-blue-800 transition">
+              <button className="bg-blue-700 text-white font-bold py-2 px-50 rounded-full shadow hover:bg-blue-800 transition">
                 Continuar
               </button>
             </Link>
