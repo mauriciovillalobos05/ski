@@ -23,7 +23,7 @@ const Kueski_button = () => {
   return (
     <button
       onClick={handleMockPago}
-      className="bg-[#D9CACF] px-6 py-3 rounded-full text-black hover:opacity-90 transition text-lg"
+      className="bg-[#D9CACF] px-30 py-3 rounded-full text-black hover:opacity-70 transition text-lg"
     >
       Pagar con Kueski
     </button>

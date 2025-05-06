@@ -1,44 +1,56 @@
-import { useRouter } from "next/navigation";
-import { useState } from "react";
-import Kueski_button from '@/app/components/kueski/kueski_button';
+"use client";
 
-const PagoClient = () => {
-  const router = useRouter();
-  const [estado, setEstado] = useState(false); // Ejemplo de uso local
+import React, { useState } from "react";
+import { useSearchParams } from "next/navigation";
+import Navbar from "@/app/components/Navbar";
+import Kueski_button from "@/app/components/kueski/kueski_button";
+
+const PagoClient: React.FC = () => {
+  const searchParams = useSearchParams();
+  const [estado] = useState(true);
+
+  const fecha = searchParams.get("fecha");
+  const terraza = searchParams.get("terraza");
+
+  const fechaFormateada = fecha
+    ? new Date(fecha).toLocaleDateString("es-ES", {
+        weekday: "long",
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      })
+    : "";
 
   return (
-    <div className="container mx-auto px-4 py-10">
-      <div className="flex flex-col items-center">
-        {estado ? (
-          <>
-            <div className="bg-white p-6 rounded-lg shadow-md max-w-lg w-full">
-              <h2 className="text-2xl font-bold mb-4 text-center text-[#191919]">
-                Confirmación de Pago
-              </h2>
-              <p className="text-gray-700 text-center mb-6">
-                Gracias por tu compra. Tu pago ha sido recibido.
-              </p>
-              <div className="flex justify-center">
-                {/* Botón para pagar con Kueski */}
-                <Kueski_button />
-              </div>
-            </div>
-          </>
-        ) : (
-          <div className="flex flex-col items-center">
-            <h1 className="text-5xl font-bold text-[#191919] mb-10 text-center">
-              ¡Revisa tu correo y haz click en el link de pago para continuar con el Rodeo!
-            </h1>
-            <div className="mb-6">
-              <img
-                src="/CactusJack.png"
-                alt="CactusJack logo"
-                className="h-120 object-contain"
-              />
+    <div className="min-h-screen bg-[#967B6C]">
+      <Navbar />
+      <main className="flex justify-center items-center mt-16 px-4">
+        <div className="bg-[#ABABB1] rounded-3xl shadow-xl flex p-6 gap-6 w-full max-w-5xl">
+          {/* Left: Image */}
+          <div className="flex-shrink-0 w-1/2">
+            <img
+              src="/trexx.jpg"
+              alt="Terraza"
+              className="rounded-2xl h-full object-cover"
+            />
+          </div>
+
+          <div className="flex flex-col justify-center w-1/2">
+            <h2 className="text-5xl font-bold mb-10 text-center text-[#191919]">
+              Resumen de Pago
+            </h2>
+            <p className="text-xl font-semibold text-center text-[#191919] mb-2">
+              Reservación de terraza Oh Jacques!
+            </p>
+            <p className="text-xl font-semibold text-center text-[#191919] mb-10">
+              {fechaFormateada || "Sin fecha"}
+            </p>
+            <div className="flex justify-center">
+              <Kueski_button />
             </div>
           </div>
-        )}
-      </div>
+        </div>
+      </main>
     </div>
   );
 };
