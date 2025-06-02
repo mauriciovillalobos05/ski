@@ -83,7 +83,7 @@ export default function AnfitrionDashboard() {
                   href={`/anfitrion/terraza/${terraza.id}`}
                   className="ml-auto mt-4 bg-[#d29065] px-4 py-2 rounded-[20px] hover:opacity-90"
                 >
-                  <button>VER MÁS</button>
+                  <button>EDITAR</button>
                 </Link>
               </div>
             </div>
