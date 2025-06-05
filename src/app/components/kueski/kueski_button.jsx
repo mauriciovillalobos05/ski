@@ -1,7 +1,7 @@
 import React from "react";
 
 const Kueski_button = () => {
-
+  
   // Mock
   const handleMockPago = () => {
     alert("Simulando redirección a Kueski Pay...");
