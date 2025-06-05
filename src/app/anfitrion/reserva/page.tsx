@@ -9,14 +9,14 @@ interface Reserva {
   terraza_id: string;
   terraza_nombre: string;
   image_url: string | null;
-  anfitrion_nombre: string;
-  anfitrion_contacto: string;
+  cliente_nombre: string;
+  cliente_contacto: string;
   amount: number;
   reservation_date: string;
   status: string;
 }
 
-const Reserva = () => {
+const ReservasAnfitrion = () => {
   const supabase = createClientComponentClient();
   const [reservas, setReservas] = useState<Reserva[]>([]);
   const [loading, setLoading] = useState(true);
@@ -39,12 +39,12 @@ const Reserva = () => {
         return;
       }
 
-      const { data, error } = await supabase.rpc('get_reservas_usuario', {
-        user_id_param: user.id,
+      const { data, error } = await supabase.rpc('get_reservas_anfitrion', {
+        anfitrion_id_param: user.id,
       });
 
       if (error) {
-        console.error('Error al obtener las reservas:', error);
+        console.error('Error al obtener las reservas del anfitrión:', error);
         setErrorMsg('Hubo un problema al cargar tus reservas. Intenta de nuevo más tarde.');
       } else {
         setReservas(data || []);
@@ -60,7 +60,7 @@ const Reserva = () => {
     <div className="min-h-screen bg-[#E0CFAA]">
       <Navbar />
       <h1 className="text-5xl font-serif mb-8 text-[#191919] px-10 pt-10">
-        PONLE UBICACIÓN AL RODEO
+        RESERVAS EN TUS TERRAZAS
       </h1>
 
       <div className="flex flex-wrap justify-center gap-8 px-4 mt-10">
@@ -90,17 +90,17 @@ const Reserva = () => {
                   day: 'numeric',
                   month: 'long',
                   year: 'numeric',
-                  timeZone: 'UTC', // importante
+                  timeZone: 'UTC',
                 }).format(new Date(reserva.reservation_date + 'T00:00:00Z'))}
               </p>
               <p className="text-[#794645] mb-1">
                 Monto: ${reserva.amount?.toLocaleString('es-MX', { minimumFractionDigits: 2 })} MXN
               </p>
               <p className="text-[#794645] mb-1">
-                Anfitrión: {reserva.anfitrion_nombre ?? 'Desconocido'}
+                Cliente: {reserva.cliente_nombre ?? 'Desconocido'}
               </p>
               <p className="text-[#794645] mb-2">
-                Contacto: {reserva.anfitrion_contacto ?? 'No disponible'}
+                Contacto: {reserva.cliente_contacto ?? 'No disponible'}
               </p>
               <p className="text-sm text-white bg-[#7B5E3C] rounded px-2 py-1 inline-block">
                 Estado: {reserva.status ?? 'Desconocido'}
@@ -108,11 +108,11 @@ const Reserva = () => {
             </div>
           ))
         ) : (
-          <p className="text-white text-lg mt-20">Aún no tienes reservas.</p>
+          <p className="text-white text-lg mt-20">Aún no tienes reservas en tus terrazas.</p>
         )}
       </div>
     </div>
   );
 };
 
-export default Reserva;
+export default ReservasAnfitrion;
