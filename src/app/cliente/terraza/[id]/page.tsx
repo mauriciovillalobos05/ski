@@ -1,74 +1,134 @@
-'use client'
+"use client";
 
-import { useEffect, useState } from "react"
-import { useParams, useRouter } from "next/navigation"
-import { createClient } from '@supabase/supabase-js'
-import Calendar from "react-calendar"
-import 'react-calendar/dist/Calendar.css'
-import Navbar from "@/app/components/Navbar"
+import { useEffect, useState } from "react";
+import { useParams, useRouter } from "next/navigation";
+import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+import Calendar from "react-calendar";
+import "react-calendar/dist/Calendar.css";
+import Navbar from "@/app/components/Navbar";
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-)
+const TerrazaPage = () => {
+  const router = useRouter();
+  const { id } = useParams();
+  const supabase = createClientComponentClient();
 
-export default function TerrazaPage() {
-  const router = useRouter()
-  const { id } = useParams()
-  const [terraza, setTerraza] = useState<any>(null)
-  const [reservedDates, setReservedDates] = useState<string[]>([])
-  const [selectedDate, setSelectedDate] = useState<Date | null>(null)
+  const [terraza, setTerraza] = useState<any>(null);
+  const [reservedDates, setReservedDates] = useState<string[]>([]);
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
 
   useEffect(() => {
-    if (!id) return
+    if (!id) return;
 
     const fetchData = async () => {
       const { data, error } = await supabase
-        .from('terrazas')
-        .select('*')
-        .eq('id', id)
-        .single()
+        .from("terrazas")
+        .select("*")
+        .eq("id", id)
+        .single();
 
       if (error) {
-        console.error('Error cargando terraza:', error)
-        return
+        console.error("Error cargando terraza:", error);
+        return;
       }
 
-      setTerraza(data)
+      setTerraza(data);
 
       const { data: reserved, error: resError } = await supabase
-        .from('terraza_availability')
-        .select('available_date')
-        .eq('terraza_id', id)
+        .from("terraza_availability")
+        .select("available_date")
+        .eq("terraza_id", id);
 
       if (resError) {
-        console.error('Error cargando disponibilidad:', resError)
-        return
+        console.error("Error cargando disponibilidad:", resError);
+        return;
       }
 
-      const fechasOcupadas = reserved.map((r) => r.available_date)
-      setReservedDates(fechasOcupadas)
-    }
+      const fechasOcupadas = reserved.map((r) => r.available_date);
+      setReservedDates(fechasOcupadas);
+    };
 
-    fetchData()
-  }, [id])
+    fetchData();
+  }, [id, supabase]);
 
   const isDateDisabled = (date: Date) => {
-    const today = new Date()
-    today.setHours(0, 0, 0, 0)
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
 
-    const isoDate = date.toISOString().split('T')[0]
-    return date < today || reservedDates.includes(isoDate)
-  }
+    const isoDate = date.toISOString().split("T")[0];
+    return date < today || reservedDates.includes(isoDate);
+  };
 
-  const handlePago = () => {
-    if (!selectedDate) return
+  const handlePago = async () => {
+    if (!selectedDate) return;
 
-    const fecha = selectedDate.toISOString()
-    router.push(`/pago/${id}?fecha=${encodeURIComponent(fecha)}`)
-  }
+    const { data: userData, error: userError } = await supabase.auth.getUser();
+    const user = userData?.user;
 
-  if (!terraza) return <p className="text-white p-8">Cargando terraza...</p>
+    if (userError || !user) {
+      alert("Debes iniciar sesión para reservar.");
+      return;
+    }
+
+    const fechaISO = selectedDate.toISOString().split("T")[0];
+
+    // Paso 1: Verificar si la fecha ya está ocupada
+    const { data: disponibilidad, error: checkError } = await supabase
+      .from("terraza_availability")
+      .select("*")
+      .eq("terraza_id", id)
+      .eq("available_date", fechaISO);
+
+    if (checkError) {
+      console.error("Error al verificar disponibilidad:", checkError);
+      alert("Error al verificar disponibilidad.");
+      return;
+    }
+
+    if (disponibilidad.length > 0) {
+      alert("Esta fecha ya está reservada.");
+      return;
+    }
+
+    // Paso 2: Insertar la transacción (aquí puede haber triggers que verifiquen consistencia)
+    const { data: transaccion, error: transError } = await supabase
+      .from("transacciones")
+      .insert({
+        user_id: user.id,
+        terraza_id: id,
+        reservation_date: fechaISO,
+        status: "pending",
+        amount: terraza.price,
+      })
+      .select()
+      .single();
+
+    if (transError) {
+      console.error("Error al registrar transacción:", transError);
+      alert("No se pudo registrar la transacción.");
+      return;
+    }
+
+    // Paso 3: Insertar la fecha como ocupada
+    const { error: availError } = await supabase
+      .from("terraza_availability")
+      .insert({
+        terraza_id: id,
+        available_date: fechaISO,
+      });
+
+    if (availError) {
+      console.error("Error al marcar fecha como ocupada:", availError);
+      alert("No se pudo bloquear la fecha seleccionada.");
+      return;
+    }
+
+    // Simular redirección a pago
+    router.push(
+      `/kueski_simulado?status=success&transaccion_id=${transaccion.id}`
+    );
+  };
+
+  if (!terraza) return <p className="text-white p-8">Cargando terraza...</p>;
 
   return (
     <div className="min-h-screen bg-[#c18f54]">
@@ -85,11 +145,17 @@ export default function TerrazaPage() {
 
           <div className="flex flex-col justify-between w-1/2">
             <div>
-              <h2 className="text-2xl font-bold text-[#794645] mb-1">{terraza.name}</h2>
-              <p className="text-[#794645]">{terraza.description || "Sin descripción"}</p>
+              <h2 className="text-2xl font-bold text-[#794645] mb-1">
+                {terraza.name}
+              </h2>
+              <p className="text-[#794645]">
+                {terraza.description || "Sin descripción"}
+              </p>
               <p className="text-[#794645] mt-2">${terraza.price} p/día</p>
 
-              <p className="text-sm font-semibold text-[#794645] mt-4">Seleccione el día</p>
+              <p className="text-sm font-semibold text-[#794645] mt-4">
+                Seleccione el día
+              </p>
               <div className="bg-white rounded-md mt-2 overflow-hidden w-fit">
                 <Calendar
                   onChange={(value) => setSelectedDate(value as Date)}
@@ -114,5 +180,7 @@ export default function TerrazaPage() {
         </div>
       </main>
     </div>
-  )
-}
+  );
+};
+
+export default TerrazaPage;
