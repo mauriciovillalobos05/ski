@@ -40,7 +40,7 @@ const Reserva = () => {
       }
 
       const { data, error } = await supabase.rpc('get_reservas_usuario', {
-        user_id_param: user.id,
+        cliente_id_param: user.id, // ✅ nombre de parámetro corregido
       });
 
       if (error) {
@@ -90,7 +90,7 @@ const Reserva = () => {
                   day: 'numeric',
                   month: 'long',
                   year: 'numeric',
-                  timeZone: 'UTC', // importante
+                  timeZone: 'UTC',
                 }).format(new Date(reserva.reservation_date + 'T00:00:00Z'))}
               </p>
               <p className="text-[#794645] mb-1">

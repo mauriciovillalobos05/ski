@@ -2,18 +2,13 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { createClient } from '@supabase/supabase-js'
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import Navbar from '@/app/components/Navbar'
 import Link from 'next/link'
 import type { User } from '@supabase/supabase-js'
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-)
-
 interface Terraza {
-  id: string
+  terraza_id: string
   name: string
   description?: string
   image_url?: string
@@ -28,12 +23,14 @@ export default function ClienteDashboard() {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
   const router = useRouter()
+  const supabase = createClientComponentClient()
 
   useEffect(() => {
     const fetchTerrazas = async () => {
       const { data: userData, error: userError } = await supabase.auth.getUser()
+
       if (userError || !userData?.user) {
-        router.push('/auth/login')
+        router.push('/login')
         return
       }
 
@@ -48,17 +45,17 @@ export default function ClienteDashboard() {
       } else {
         setTerrazas(data || [])
       }
+
       setLoading(false)
     }
 
     fetchTerrazas()
-  }, [router])
+  }, [router, supabase])
 
   return (
     <div className="min-h-screen bg-[#c18f54]">
       <Navbar />
 
-      {/* Top Bar */}
       <div className="flex justify-between items-center px-8 py-6">
         <h1 className="text-4xl font-serif text-white">Terrazas disponibles</h1>
       </div>
@@ -69,7 +66,7 @@ export default function ClienteDashboard() {
         ) : terrazas.length > 0 ? (
           terrazas.map((terraza) => (
             <div
-              key={terraza.id}
+              key={terraza.terraza_id}
               className="bg-[#d4d2d5] w-96 rounded-2xl shadow-xl p-4"
             >
               <img
@@ -85,7 +82,7 @@ export default function ClienteDashboard() {
               <p className="text-sm font-semibold text-[#794645]">{terraza.owner_email}</p>
               <div className="flex">
                 <Link
-                  href={`/cliente/terraza/${terraza.id}`}
+                  href={`/cliente/terraza/${terraza.terraza_id}`}
                   className="ml-auto mt-4 bg-[#d29065] px-4 py-2 rounded-[20px] hover:opacity-90 text-white font-semibold"
                 >
                   Reservar

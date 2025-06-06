@@ -61,16 +61,16 @@ export default function AnfitrionDashboard() {
           <p className="text-white text-xl">Cargando terrazas...</p>
         ) : terrazas.length > 0 ? (
           terrazas.map((terraza) => (
-            <div key={terraza.id} className="bg-[#d4d2d5] w-96 rounded-2xl shadow-xl p-4">
+            <div key={terraza.terraza_id} className="bg-[#d4d2d5] w-96 rounded-2xl shadow-xl p-4">
               {terraza.image_url ? (
                 <img 
-                    src={terraza.image_url} 
-                    alt={terraza.name} 
-                    className="terraza-image"
+                  src={terraza.image_url} 
+                  alt={terraza.name} 
+                  className="terraza-image"
                 />
-                ) : (
+              ) : (
                 <div className="terraza-placeholder">
-                    Sin imagen
+                  Sin imagen
                 </div>
               )}
               <h2 className="text-lg font-semibold text-[#794645]">{terraza.name}</h2>
@@ -80,7 +80,7 @@ export default function AnfitrionDashboard() {
               <p className="text-sm font-semibold text-[#794645]">{terraza.owner_email}</p>
               <div className="flex">
                 <Link
-                  href={`/anfitrion/terraza/${terraza.id}`}
+                  href={`/anfitrion/terraza/${terraza.terraza_id}`}
                   className="ml-auto mt-4 bg-[#d29065] px-4 py-2 rounded-[20px] hover:opacity-90"
                 >
                   <button>EDITAR</button>
@@ -93,7 +93,6 @@ export default function AnfitrionDashboard() {
         )}
       </main>
 
-      {/* Botón para subir nueva terraza */}
       {user && (
         <div className="flex justify-center mt-10">
           <button

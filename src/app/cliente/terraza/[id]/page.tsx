@@ -13,38 +13,41 @@ const TerrazaPage = () => {
   const supabase = createClientComponentClient();
 
   const [terraza, setTerraza] = useState<any>(null);
-  const [reservedDates, setReservedDates] = useState<string[]>([]);
+  const [blockedDates, setBlockedDates] = useState<string[]>([]);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!id) return;
 
     const fetchData = async () => {
+      // Cargar datos de la terraza
       const { data, error } = await supabase
         .from("terrazas")
         .select("*")
         .eq("id", id)
         .single();
 
-      if (error) {
+      if (error || !data) {
         console.error("Error cargando terraza:", error);
         return;
       }
 
       setTerraza(data);
 
-      const { data: reserved, error: resError } = await supabase
+      // Cargar fechas bloqueadas (ya reservadas)
+      const { data: blocked, error: blockError } = await supabase
         .from("terraza_availability")
         .select("available_date")
         .eq("terraza_id", id);
 
-      if (resError) {
-        console.error("Error cargando disponibilidad:", resError);
+      if (blockError) {
+        console.error("Error cargando disponibilidad:", blockError);
         return;
       }
 
-      const fechasOcupadas = reserved.map((r) => r.available_date);
-      setReservedDates(fechasOcupadas);
+      setBlockedDates(blocked.map((r) => r.available_date)); // formato 'yyyy-mm-dd'
+      setLoading(false);
     };
 
     fetchData();
@@ -54,12 +57,12 @@ const TerrazaPage = () => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    const isoDate = date.toISOString().split("T")[0];
-    return date < today || reservedDates.includes(isoDate);
+    const iso = date.toISOString().split("T")[0];
+    return date < today || blockedDates.includes(iso);
   };
 
   const handlePago = async () => {
-    if (!selectedDate) return;
+    if (!selectedDate || !terraza) return;
 
     const { data: userData, error: userError } = await supabase.auth.getUser();
     const user = userData?.user;
@@ -71,7 +74,7 @@ const TerrazaPage = () => {
 
     const fechaISO = selectedDate.toISOString().split("T")[0];
 
-    // Paso 1: Verificar si la fecha ya está ocupada
+    // Verificar si ya está bloqueada (doble validación por seguridad)
     const { data: disponibilidad, error: checkError } = await supabase
       .from("terraza_availability")
       .select("*")
@@ -79,7 +82,6 @@ const TerrazaPage = () => {
       .eq("available_date", fechaISO);
 
     if (checkError) {
-      console.error("Error al verificar disponibilidad:", checkError);
       alert("Error al verificar disponibilidad.");
       return;
     }
@@ -89,11 +91,11 @@ const TerrazaPage = () => {
       return;
     }
 
-    // Paso 2: Insertar la transacción (aquí puede haber triggers que verifiquen consistencia)
+    // Insertar transacción
     const { data: transaccion, error: transError } = await supabase
       .from("transacciones")
       .insert({
-        user_id: user.id,
+        cliente_id: user.id,
         terraza_id: id,
         reservation_date: fechaISO,
         status: "pending",
@@ -103,12 +105,11 @@ const TerrazaPage = () => {
       .single();
 
     if (transError) {
-      console.error("Error al registrar transacción:", transError);
       alert("No se pudo registrar la transacción.");
       return;
     }
 
-    // Paso 3: Insertar la fecha como ocupada
+    // Bloquear la fecha en disponibilidad
     const { error: availError } = await supabase
       .from("terraza_availability")
       .insert({
@@ -117,18 +118,16 @@ const TerrazaPage = () => {
       });
 
     if (availError) {
-      console.error("Error al marcar fecha como ocupada:", availError);
-      alert("No se pudo bloquear la fecha seleccionada.");
+      alert("No se pudo bloquear la fecha.");
       return;
     }
 
-    // Simular redirección a pago
     router.push(
       `/kueski_simulado?status=success&transaccion_id=${transaccion.id}`
     );
   };
 
-  if (!terraza) return <p className="text-white p-8">Cargando terraza...</p>;
+  if (loading) return <p className="text-white p-8">Cargando terraza...</p>;
 
   return (
     <div className="min-h-screen bg-[#c18f54]">
@@ -148,13 +147,11 @@ const TerrazaPage = () => {
               <h2 className="text-2xl font-bold text-[#794645] mb-1">
                 {terraza.name}
               </h2>
-              <p className="text-[#794645]">
-                {terraza.description || "Sin descripción"}
-              </p>
+              <p className="text-[#794645]">{terraza.description || "Sin descripción"}</p>
               <p className="text-[#794645] mt-2">${terraza.price} p/día</p>
 
               <p className="text-sm font-semibold text-[#794645] mt-4">
-                Seleccione el día
+                Selecciona el día
               </p>
               <div className="bg-white rounded-md mt-2 overflow-hidden w-fit">
                 <Calendar
@@ -184,3 +181,4 @@ const TerrazaPage = () => {
 };
 
 export default TerrazaPage;
+
