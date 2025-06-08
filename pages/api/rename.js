@@ -80,7 +80,7 @@ export default async function handler(req, res) {
         email: email || 'no-email@placeholder.com'
       },
       callbacks: {
-        on_success: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://jackboys.vercel.app'}/success`,
+        on_success: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://jackboys.vercel.app'}/success?transaccion_id=${transactionId}`,
         on_reject: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://jackboys.vercel.app'}/reject`,
         on_canceled: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://jackboys.vercel.app'}/reject`,
         on_failed: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://jackboys.vercel.app'}/reject`
@@ -108,14 +108,26 @@ export default async function handler(req, res) {
     await supabase
         .from('transacciones')
         .update({
+        status: result.data.status,
         kueski_payment_url: result.data.callback_url,
         kueski_created_at: new Date().toISOString()
         })
         .eq('id', transactionId);
 
+    await supabase
+      .from("terraza_availability")
+      .update({ status: 'confirmed' }) 
+      .eq("terraza_id", tx.terraza_id)
+      .eq("available_date", tx.reservation_date);
+
     return res.status(200).json({ status: 'success', data: result.data });
 
     } else {
+      await supabase
+      .from("terraza_availability")
+      .update({ status: 'rejected' }) 
+      .eq("terraza_id", tx.terraza_id)
+      .eq("available_date", tx.reservation_date);
       console.error('Error Kueski:', result);
       return res.status(500).json({ error: 'Error en respuesta de Kueski', details: result });
     }

@@ -47,7 +47,7 @@ const TerrazaPage = () => {
 
       const { data: blocked, error: blockError } = await supabase
         .from("terraza_availability")
-        .select("available_date")
+        .select("available_date, status")
         .eq("terraza_id", id);
 
       if (blockError) {
@@ -55,7 +55,10 @@ const TerrazaPage = () => {
         return;
       }
 
-      setBlockedDates(blocked.map((r) => r.available_date));
+      setBlockedDates(blocked
+        .filter((r) => ['confirmed', 'pending'].includes(r.status))
+        .map((r) => r.available_date)
+      );
       setLoading(false);
     };
 
