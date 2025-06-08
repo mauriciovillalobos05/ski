@@ -5,7 +5,7 @@ import { usePathname } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
 
 const Navbar: React.FC = () => {
-  const pathname = usePathname();
+  const pathname = usePathname() ?? "";
   const [rolePrefix, setRolePrefix] = useState('cliente'); // Default to 'cliente'
 
   useEffect(() => {

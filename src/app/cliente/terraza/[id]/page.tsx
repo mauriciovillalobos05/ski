@@ -1,18 +1,29 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
 import Navbar from "@/app/components/Navbar";
 import KueskiButton from "@/app/components/kueski/kueski_button";
 
+// Define tipo de terraza
+type Terraza = {
+  id: string;
+  name: string;
+  description?: string;
+  price: number;
+  image_url?: string;
+};
+
 const TerrazaPage = () => {
-  const { id } = useParams();
+  const params = useParams();
+  const id = Array.isArray(params?.id) ? params.id[0] : params?.id;
+
   const supabase = createClientComponentClient();
 
-  const [terraza, setTerraza] = useState<any>(null);
+  const [terraza, setTerraza] = useState<Terraza | null>(null);
   const [blockedDates, setBlockedDates] = useState<string[]>([]);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [loading, setLoading] = useState(true);
@@ -21,7 +32,6 @@ const TerrazaPage = () => {
     if (!id) return;
 
     const fetchData = async () => {
-      // Cargar datos de la terraza
       const { data, error } = await supabase
         .from("terrazas")
         .select("*")
@@ -35,7 +45,6 @@ const TerrazaPage = () => {
 
       setTerraza(data);
 
-      // Cargar fechas bloqueadas (ya reservadas)
       const { data: blocked, error: blockError } = await supabase
         .from("terraza_availability")
         .select("available_date")
@@ -46,7 +55,7 @@ const TerrazaPage = () => {
         return;
       }
 
-      setBlockedDates(blocked.map((r) => r.available_date)); // formato 'yyyy-mm-dd'
+      setBlockedDates(blocked.map((r) => r.available_date));
       setLoading(false);
     };
 
@@ -56,12 +65,12 @@ const TerrazaPage = () => {
   const isDateDisabled = (date: Date) => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-
     const iso = date.toISOString().split("T")[0];
     return date < today || blockedDates.includes(iso);
   };
 
   if (loading) return <p className="text-white p-8">Cargando terraza...</p>;
+  if (!terraza) return <p className="text-white p-8">Terraza no encontrada.</p>;
 
   return (
     <div className="min-h-screen bg-[#c18f54]">
@@ -81,7 +90,9 @@ const TerrazaPage = () => {
               <h2 className="text-2xl font-bold text-[#794645] mb-1">
                 {terraza.name}
               </h2>
-              <p className="text-[#794645]">{terraza.description || "Sin descripción"}</p>
+              <p className="text-[#794645]">
+                {terraza.description || "Sin descripción"}
+              </p>
               <p className="text-[#794645] mt-2">${terraza.price} p/día</p>
 
               <p className="text-sm font-semibold text-[#794645] mt-4">
@@ -108,4 +119,3 @@ const TerrazaPage = () => {
 };
 
 export default TerrazaPage;
-
