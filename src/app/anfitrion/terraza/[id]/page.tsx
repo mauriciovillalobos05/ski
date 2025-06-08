@@ -10,8 +10,19 @@ const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 )
 
+interface Terraza {
+  terraza_id: string;
+  name: string;
+  description?: string;
+  price: number;
+  image_url?: string;
+  capacity?: number;
+  [key: string]: any;
+}
+
 export default function EditarTerraza() {
-  const { id } = useParams()
+  const params = useParams() as { id: string }
+  const id = params.id
   const router = useRouter()
 
   const [terraza, setTerraza] = useState<any>(null)

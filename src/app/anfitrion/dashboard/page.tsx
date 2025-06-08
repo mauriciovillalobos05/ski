@@ -6,14 +6,26 @@ import { createClient } from '@supabase/supabase-js'
 import Navbar from "@/app/components/Navbar"
 import Link from "next/link"
 import type { User } from '@supabase/supabase-js'
+import Image from "next/image"
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 )
 
+interface Terraza {
+  terraza_id: string;
+  name: string;
+  description?: string;
+  image_url?: string;
+  price: number;
+  owner_name: string;
+  owner_email: string;
+  user_id: string;
+}
+
 export default function AnfitrionDashboard() {
-  const [terrazas, setTerrazas] = useState<any[]>([])
+  const [terrazas, setTerrazas] = useState<Terraza[]>([]);
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
   const router = useRouter()
@@ -63,7 +75,7 @@ export default function AnfitrionDashboard() {
           terrazas.map((terraza) => (
             <div key={terraza.terraza_id} className="bg-[#d4d2d5] w-96 rounded-2xl shadow-xl p-4">
               {terraza.image_url ? (
-                <img 
+                <Image
                   src={terraza.image_url} 
                   alt={terraza.name} 
                   className="terraza-image"

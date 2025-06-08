@@ -22,35 +22,40 @@ export default function ClienteDashboard() {
   const [terrazas, setTerrazas] = useState<Terraza[]>([])
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
+
   const router = useRouter()
   const supabase = createClientComponentClient()
 
   useEffect(() => {
     const fetchTerrazas = async () => {
-      const { data: userData, error: userError } = await supabase.auth.getUser()
+      const {
+        data: { user },
+        error: userError
+      } = await supabase.auth.getUser()
 
-      if (userError || !userData?.user) {
+      if (userError || !user) {
         router.push('/login')
         return
       }
 
-      setUser(userData.user)
+      setUser(user)
 
       const { data, error } = await supabase
         .from('terrazas_with_owner')
         .select('*')
 
       if (error) {
-        console.error('Error fetching terrazas:', error)
+        console.error('Error al cargar terrazas:', error.message)
+        setTerrazas([])
       } else {
-        setTerrazas(data || [])
+        setTerrazas(data as Terraza[])
       }
 
       setLoading(false)
     }
 
     fetchTerrazas()
-  }, [router, supabase])
+  }, [router])
 
   return (
     <div className="min-h-screen bg-[#c18f54]">
@@ -76,10 +81,18 @@ export default function ClienteDashboard() {
               />
               <h2 className="text-lg font-semibold text-[#794645]">{terraza.name}</h2>
               <p className="text-[#794645]">{terraza.description || 'Sin descripción.'}</p>
-              <p className="text-[#794645] font-semibold mt-2">${terraza.price} MXN p/día</p>
-              <p className="text-[#794645] mb-2">{terraza.capacity || 100} personas</p>
-              <p className="text-sm font-semibold text-[#794645]">Anfitrión: {terraza.owner_name}</p>
-              <p className="text-sm font-semibold text-[#794645]">{terraza.owner_email}</p>
+              <p className="text-[#794645] font-semibold mt-2">
+                ${terraza.price} MXN p/día
+              </p>
+              <p className="text-[#794645] mb-2">
+                {terraza.capacity || 100} personas
+              </p>
+              <p className="text-sm font-semibold text-[#794645]">
+                Anfitrión: {terraza.owner_name}
+              </p>
+              <p className="text-sm font-semibold text-[#794645]">
+                {terraza.owner_email}
+              </p>
               <div className="flex">
                 <Link
                   href={`/cliente/terraza/${terraza.terraza_id}`}
@@ -91,7 +104,9 @@ export default function ClienteDashboard() {
             </div>
           ))
         ) : (
-          <p className="text-white text-lg">No hay terrazas disponibles por el momento.</p>
+          <p className="text-white text-lg">
+            No hay terrazas disponibles por el momento.
+          </p>
         )}
       </main>
     </div>

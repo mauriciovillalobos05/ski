@@ -2,13 +2,18 @@
 
 import { useRouter } from "next/navigation";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+interface Terraza {
+  id: string;
+  name: string;
+  price: number;
+}
 
 const Kueski_button = ({
   selectedDate,
   terraza,
 }: {
   selectedDate: Date | null;
-  terraza: any;
+  terraza: Terraza;
 }) => {
   const router = useRouter();
   const supabase = createClientComponentClient();
