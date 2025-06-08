@@ -82,8 +82,8 @@ export default async function handler(req, res) {
       callbacks: {
         on_success: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://jackboys.vercel.app'}/success`,
         on_reject: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://jackboys.vercel.app'}/reject`,
-        on_canceled: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://jackboys.vercel.app'}/canceled`,
-        on_failed: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://jackboys.vercel.app'}/failed`
+        on_canceled: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://jackboys.vercel.app'}/reject`,
+        on_failed: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://jackboys.vercel.app'}/reject`
       }
     };
 
