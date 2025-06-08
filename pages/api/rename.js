@@ -80,10 +80,10 @@ export default async function handler(req, res) {
         email: email || 'no-email@placeholder.com'
       },
       callbacks: {
-        on_success: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://kueski-link.vercel.app'}/success`,
-        on_reject: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://kueski-link.vercel.app'}/reject`,
-        on_canceled: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://kueski-link.vercel.app'}/canceled`,
-        on_failed: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://kueski-link.vercel.app'}/failed`
+        on_success: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://jackboys.vercel.app'}/success`,
+        on_reject: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://jackboys.vercel.app'}/reject`,
+        on_canceled: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://jackboys.vercel.app'}/canceled`,
+        on_failed: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://jackboys.vercel.app'}/failed`
       }
     };
 
@@ -93,7 +93,7 @@ export default async function handler(req, res) {
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${process.env.API_KEY}`,
-        'kp-name': 'kueskilink-dev',
+        'kp-name': 'jackboys-dev',
         'kp-source': 'web',
         'kp-version': '1.0.0',
         'kp-trigger': 'api'

@@ -75,7 +75,7 @@ export default function AnfitrionDashboard() {
           terrazas.map((terraza) => (
             <div key={terraza.terraza_id} className="bg-[#d4d2d5] w-96 rounded-2xl shadow-xl p-4">
               {terraza.image_url ? (
-                <Image
+                <img
                   src={terraza.image_url} 
                   alt={terraza.name} 
                   className="terraza-image"

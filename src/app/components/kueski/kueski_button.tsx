@@ -108,7 +108,7 @@ const Kueski_button = ({
             user.user_metadata.full_name || "usuario"
           },\n\nTu reserva de la terraza '${
             terraza.name
-          }' para el ${fechaISO} ha sido registrada exitosamente.\n\n¡Gracias por tu pago con Kueski!`,
+          }' para el ${fechaISO} ha sido registrada exitosamente.\n\nPara terminar el proceso has click en la siguiente liga y proceder con tu pago`,
           callback_url: result.data.callback_url,
         }),
       });
