@@ -35,10 +35,14 @@ export default function Success() {
   }, [searchParams]);
 
   if (!fecha || !monto) {
-    return <p className="text-center p-6">Cargando detalles de la reserva...</p>;
+    return (
+      <p className="text-center p-6">Cargando detalles de la reserva...</p>
+    );
   }
 
-  const fechaFormateada = new Date(fecha).toLocaleDateString("es-MX", {
+  const [year, month, day] = fecha.split("-").map(Number);
+  const fechaLocal = new Date(year, month - 1, day);
+  const fechaFormateada = fechaLocal.toLocaleDateString("es-MX", {
     day: "numeric",
     month: "long",
     year: "numeric",
@@ -46,7 +50,7 @@ export default function Success() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#dcc9a2]">
-        <Navbar />
+      <Navbar />
       <div className="bg-[#b6996e] rounded-2xl p-10 w-[90%] max-w-xl shadow-md">
         <h1 className="text-3xl font-bold text-black mb-6">
           Confirmación de tu reserva
@@ -60,7 +64,7 @@ export default function Success() {
 
         <div className="mt-8">
           <button
-            onClick={() => window.location.href = "/"}
+            onClick={() => (window.location.href = "/")}
             className="bg-[#868b04] text-black font-semibold px-6 py-2 rounded-full hover:bg-[#6e7203] transition"
           >
             Continuar →
