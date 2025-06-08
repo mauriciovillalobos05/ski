@@ -93,7 +93,7 @@ export default async function handler(req, res) {
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${process.env.API_KEY}`,
-        'kp-name': 'jackboys-dev',
+        'kp-name': 'kueskilink-dev',
         'kp-source': 'web',
         'kp-version': '1.0.0',
         'kp-trigger': 'api'

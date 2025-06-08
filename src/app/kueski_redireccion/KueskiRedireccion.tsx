@@ -4,6 +4,7 @@ export const dynamic = 'force-dynamic';
 import { useSearchParams } from 'next/navigation';
 import { useEffect } from 'react';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import Navbar from '../components/Navbar';
 
 const KueskiRedirectionPage = () => {
   const searchParams = useSearchParams();
@@ -35,6 +36,7 @@ const KueskiRedirectionPage = () => {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-[#f0e8e8] text-[#794645]">
+      <Navbar />
       <h1 className="text-4xl font-bold mb-4">Kueski Pay (Revisa tu correo)</h1>
       <p className="text-xl">
         Estado del pago:{' '}
