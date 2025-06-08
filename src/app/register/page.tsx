@@ -1,13 +1,12 @@
 'use client'
 
-import { useRouter } from 'next/navigation'
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
+import Image from "next/image"
 
 export default function Register() {
   const supabase = createClientComponentClient()
-  const router = useRouter()
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -61,7 +60,7 @@ export default function Register() {
           </h1>
 
           <div className="bg-[#ccc4aa] py-10 px-6 rounded-2xl border border-blue-900 shadow-lg w-full max-w-sm text-center min-h-[28rem] flex flex-col justify-between">
-            <img src="/Jack.png" alt="Jack logo" className="mx-auto mb-4" />
+            <Image src="/Jack.png" alt="Jack logo" width={120} height={120} className="mx-auto mb-4" />
 
             <div className="text-left space-y-4 mb-6">
               <div>
@@ -126,8 +125,8 @@ export default function Register() {
             Revisa tu correo y verifica tu cuenta para continuar.
           </h1>
           <div className="py-6 px-3 max-w-sm text-center min-h-[28rem] flex flex-col justify-between">
-            <img src="/Jack.png" alt="Jack logo" className="mx-auto mb-6" />
-            <img src="/CactusJack.png" alt="CactusJack logo" className="mx-auto mb-8 scale-140" />
+            <Image src="/Jack.png" alt="Jack logo" width={120} height={120} className="mx-auto mb-6" />
+            <Image src="/CactusJack.png" alt="CactusJack logo" width={120} height={120} className="mx-auto mb-8 scale-140" />
           </div>
           {emailVerified ? (
             <Link href="/register">

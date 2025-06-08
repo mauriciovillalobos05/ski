@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
-import Link from 'next/link'
+import Image from "next/image"
 
 type User = {
   id: string
@@ -82,7 +82,7 @@ export default function CompleteProfile() {
         onSubmit={handleSubmit}
         className="bg-[#ccc4aa] py-10 px-6 rounded-2xl border border-blue-900 shadow-lg w-full max-w-sm text-center min-h-[28rem] flex flex-col justify-between"
       >
-        <img src="/Jack.png" alt="Jack logo" className="mx-auto mb-4" />
+        <Image src="/Jack.png" alt="Jack logo" width={120} height={120} className="mx-auto mb-4" />
 
         <div className="text-left space-y-4 mb-6">
           <div>

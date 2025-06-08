@@ -1,10 +1,17 @@
 "use client"
 
-import { useParams, useSearchParams, useRouter } from "next/navigation"
+import { useParams, useSearchParams } from "next/navigation"
 import { useEffect, useState } from "react"
 import Navbar from "@/app/components/Navbar"
 import Kueski_button from "@/app/components/kueski/kueski_button"
 import { createClient } from "@supabase/supabase-js"
+import Image from "next/image"
+
+type Terraza = {
+  id: string
+  name: string
+  image_url: string
+}
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -12,17 +19,22 @@ const supabase = createClient(
 )
 
 export default function PagoPage() {
-  const { id } = useParams()
+  const params = useParams()
   const searchParams = useSearchParams()
-  const router = useRouter()
+
+  const id = params?.id as string | undefined
+  const fecha = searchParams?.get("fecha")
 
   const [fechaValida, setFechaValida] = useState<string | null>(null)
-  const [terraza, setTerraza] = useState<any>(null)
+  const [terraza, setTerraza] = useState<Terraza | null>(null)
   const [error, setError] = useState<string | null>(null)
 
-  const fecha = searchParams.get("fecha")
-
   useEffect(() => {
+    if (!id) {
+      setError("ID de terraza no especificado")
+      return
+    }
+
     if (!fecha) {
       setError("Falta la fecha en la URL")
       return
@@ -48,7 +60,7 @@ export default function PagoPage() {
         return
       }
 
-      setTerraza(data)
+      setTerraza(data as Terraza)
     }
 
     fetchTerraza()
@@ -85,16 +97,15 @@ export default function PagoPage() {
       <Navbar />
       <main className="flex justify-center items-center mt-16 px-4">
         <div className="bg-[#ABABB1] rounded-3xl shadow-xl flex p-6 gap-6 w-full max-w-5xl">
-          {/* Imagen */}
-          <div className="flex-shrink-0 w-1/2">
-            <img
+          <div className="flex-shrink-0 w-1/2 relative h-[400px]">
+            <Image
               src={terraza.image_url || "/placeholder.jpg"}
               alt={terraza.name}
-              className="rounded-2xl h-full object-cover"
+              fill
+              className="rounded-2xl object-cover"
             />
           </div>
 
-          {/* Detalles de pago */}
           <div className="flex flex-col justify-center w-1/2">
             <h2 className="text-5xl font-bold mb-10 text-center text-[#191919]">
               Resumen de Pago
@@ -106,7 +117,10 @@ export default function PagoPage() {
               {fechaFormateada}
             </p>
             <div className="flex justify-center">
-              <Kueski_button />
+              <Kueski_button
+                selectedDate={new Date(fechaValida)}
+                terraza={terraza}
+              />
             </div>
           </div>
         </div>
