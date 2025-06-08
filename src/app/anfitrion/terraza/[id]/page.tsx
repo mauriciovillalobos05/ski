@@ -11,21 +11,19 @@ const supabase = createClient(
 )
 
 interface Terraza {
-  terraza_id: string;
-  name: string;
-  description?: string;
-  price: number;
-  image_url?: string;
-  capacity?: number;
-  [key: string]: any;
+  id: string
+  name: string
+  description?: string
+  price: number
+  image_url?: string
+  capacity?: number
 }
 
 export default function EditarTerraza() {
-  const params = useParams() as { id: string }
-  const id = params.id
+  const { id } = useParams() as { id: string }
   const router = useRouter()
 
-  const [terraza, setTerraza] = useState<any>(null)
+  const [terraza, setTerraza] = useState<Terraza | null>(null)
   const [nombre, setNombre] = useState('')
   const [descripcion, setDescripcion] = useState('')
   const [precio, setPrecio] = useState('')
@@ -47,8 +45,8 @@ export default function EditarTerraza() {
 
       setTerraza(data)
       setNombre(data.name)
-      setDescripcion(data.description)
-      setPrecio(data.price)
+      setDescripcion(data.description || '')
+      setPrecio(data.price.toString())
       setPreview(data.image_url || '')
     }
 
@@ -66,15 +64,15 @@ export default function EditarTerraza() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
+    if (!terraza) return
+
     let image_url = terraza.image_url
 
-    // Verifica si hay imagen nueva que subir
     if (imagen) {
       const filename = `images/${crypto.randomUUID()}-${Date.now()}`
 
-      // Verifica que el usuario esté autenticado
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) {
+      const { data: authData } = await supabase.auth.getUser()
+      if (!authData?.user) {
         console.error('Usuario no autenticado')
         return
       }
@@ -83,7 +81,7 @@ export default function EditarTerraza() {
         .from("terrazas")
         .upload(filename, imagen)
 
-      if (uploadError) {
+      if (uploadError || !uploadData) {
         console.error('Error al subir imagen:', uploadError)
         return
       }
@@ -96,7 +94,6 @@ export default function EditarTerraza() {
       image_url = publicUrlData.publicUrl
     }
 
-    // Actualiza los datos de la terraza
     const { error: updateError } = await supabase
       .from('terrazas')
       .update({
@@ -165,21 +162,21 @@ export default function EditarTerraza() {
             )}
           </div>
 
-            <div className="mt-4 flex justify-between">
-                <button
-                    type="button"
-                    onClick={() => router.push('/anfitrion/dashboard')}
-                    className="w-full bg-gray-400 text-white font-semibold py-2 px-4 rounded hover:opacity-90 mr-2"
-                >
-                    Cancelar
-                </button>
-                <button
-                    type="submit"
-                    className="w-full bg-[#794645] text-white font-semibold py-2 px-4 rounded hover:opacity-90 ml-2"
-                >
-                    Guardar Cambios
-                </button>
-            </div>
+          <div className="mt-4 flex justify-between">
+            <button
+              type="button"
+              onClick={() => router.push('/anfitrion/dashboard')}
+              className="w-full bg-gray-400 text-white font-semibold py-2 px-4 rounded hover:opacity-90 mr-2"
+            >
+              Cancelar
+            </button>
+            <button
+              type="submit"
+              className="w-full bg-[#794645] text-white font-semibold py-2 px-4 rounded hover:opacity-90 ml-2"
+            >
+              Guardar Cambios
+            </button>
+          </div>
         </form>
       </div>
     </div>
