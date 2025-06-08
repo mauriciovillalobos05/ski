@@ -11,6 +11,7 @@ type Terraza = {
   id: string
   name: string
   image_url: string
+  price: number
 }
 
 const supabase = createClient(
