@@ -19,7 +19,7 @@ export default async function handler(req, res) {
   try {
     // 1. Obtener transacción
     const { data: tx, error: txError } = await supabase
-      .from('transactions')
+      .from('transacciones')
       .select('*')
       .eq('id', transactionId)
       .single();
@@ -31,9 +31,9 @@ export default async function handler(req, res) {
 
     // 2. Obtener productos
     const { data: pt, error: ptError } = await supabase
-      .from('products_transactions')
-      .select('unit_price, quantity, description, products (name)')
-      .eq('transaction_id', transactionId);
+      .from('terrazas')
+      .select('price, name, description')
+
 
     if (ptError || !pt) {
       console.error('Error en productos:', ptError?.message);
@@ -57,13 +57,13 @@ export default async function handler(req, res) {
         currency: 'MXN',
         details: { subtotal: tx.amount }
       },
-      items: pt.map((item, i) => ({
-        name: item.products.name,
-        description: item.description || '',
-        quantity: item.quantity,
-        price: item.unit_price,
-        currency: 'MXN',
-        sku: `SKU-${i + 1}`
+      items: pt.map((terraza, i) => ({
+        name: terraza.name,
+        description: terraza.description || '',
+        price: terraza.price,
+       currency: 'MXN',
+        sku: `SKU-${i + 1}`,
+        quantity: 1
       })),
       shipping: {
         name: shippingName,
@@ -76,7 +76,7 @@ export default async function handler(req, res) {
           zipcode: "06000",
           country: "MX"
         },
-        phone_number: phone || '0000000000',
+        phone_number: (phone ?? '0000000000'),
         email: email || 'no-email@placeholder.com'
       },
       callbacks: {
@@ -106,7 +106,7 @@ export default async function handler(req, res) {
     if (result.status === 'success') {
     // 6. Guardar URL y timestamp en BD
     await supabase
-        .from('transactions')
+        .from('transacciones')
         .update({
         kueski_payment_url: result.data.callback_url,
         kueski_created_at: new Date().toISOString()

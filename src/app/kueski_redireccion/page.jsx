@@ -4,7 +4,7 @@ import { useSearchParams } from 'next/navigation';
 import { useEffect } from 'react';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 
-const KueskiSimuladoPage = () => {
+const KueskiRedirectionPage = () => {
   const searchParams = useSearchParams();
   const status = searchParams.get("status");
   const transaccionId = searchParams.get("transaccion_id");
@@ -20,7 +20,7 @@ const KueskiSimuladoPage = () => {
           .eq("id", transaccionId)
 
         if (error) {
-          console.error("Error actualizando transacción simulada:", error);
+          console.error("Error actualizando transacción:", error);
         }
       }
     }
@@ -30,12 +30,15 @@ const KueskiSimuladoPage = () => {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-[#f0e8e8] text-[#794645]">
-      <h1 className="text-4xl font-bold mb-4">Kueski Pay (Simulado)</h1>
+      <h1 className="text-4xl font-bold mb-4">Kueski Pay (Revisa tu correo)</h1>
       <p className="text-xl">
         Estado del pago: <strong>{status === "success" ? "Éxito" : "Fallido"}</strong>
       </p>
+      <div className="flex justify-center items-center mb-6">
+        <img src="/CactusJack.png" alt="CactusJack logo" className="h-55 object-contain" />
+      </div>
     </div>
   );
 };
 
-export default KueskiSimuladoPage;
+export default KueskiRedirectionPage;

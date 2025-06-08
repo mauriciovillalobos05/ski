@@ -6,9 +6,9 @@ import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
 import Navbar from "@/app/components/Navbar";
+import KueskiButton from "@/app/components/kueski/kueski_button";
 
 const TerrazaPage = () => {
-  const router = useRouter();
   const { id } = useParams();
   const supabase = createClientComponentClient();
 
@@ -61,72 +61,6 @@ const TerrazaPage = () => {
     return date < today || blockedDates.includes(iso);
   };
 
-  const handlePago = async () => {
-    if (!selectedDate || !terraza) return;
-
-    const { data: userData, error: userError } = await supabase.auth.getUser();
-    const user = userData?.user;
-
-    if (userError || !user) {
-      alert("Debes iniciar sesión para reservar.");
-      return;
-    }
-
-    const fechaISO = selectedDate.toISOString().split("T")[0];
-
-    // Verificar si ya está bloqueada (doble validación por seguridad)
-    const { data: disponibilidad, error: checkError } = await supabase
-      .from("terraza_availability")
-      .select("*")
-      .eq("terraza_id", id)
-      .eq("available_date", fechaISO);
-
-    if (checkError) {
-      alert("Error al verificar disponibilidad.");
-      return;
-    }
-
-    if (disponibilidad.length > 0) {
-      alert("Esta fecha ya está reservada.");
-      return;
-    }
-
-    // Insertar transacción
-    const { data: transaccion, error: transError } = await supabase
-      .from("transacciones")
-      .insert({
-        cliente_id: user.id,
-        terraza_id: id,
-        reservation_date: fechaISO,
-        status: "pending",
-        amount: terraza.price,
-      })
-      .select()
-      .single();
-
-    if (transError) {
-      alert("No se pudo registrar la transacción.");
-      return;
-    }
-
-    // Bloquear la fecha en disponibilidad
-    const { error: availError } = await supabase
-      .from("terraza_availability")
-      .insert({
-        terraza_id: id,
-        available_date: fechaISO,
-      });
-
-    if (availError) {
-      alert("No se pudo bloquear la fecha.");
-      return;
-    }
-
-    router.push(
-      `/kueski_simulado?status=success&transaccion_id=${transaccion.id}`
-    );
-  };
-
   if (loading) return <p className="text-white p-8">Cargando terraza...</p>;
 
   return (
@@ -164,14 +98,7 @@ const TerrazaPage = () => {
             </div>
 
             <div className="flex justify-end mt-4">
-              <button
-                onClick={handlePago}
-                className={`bg-[#d29065] px-6 py-2 rounded-full text-white hover:opacity-90 transition ${
-                  !selectedDate ? "pointer-events-none opacity-50" : ""
-                }`}
-              >
-                PAGAR
-              </button>
+              <KueskiButton selectedDate={selectedDate} terraza={terraza} />
             </div>
           </div>
         </div>
