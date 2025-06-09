@@ -1,8 +1,9 @@
-'use client';
+'use client'
 
-import { useEffect, useState } from 'react';
-import Navbar from '@/app/components/Navbar';
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { createClient } from '@supabase/supabase-js'
+import Navbar from '@/app/components/Navbar'
 
 interface Reserva {
   id: string;
@@ -16,75 +17,69 @@ interface Reserva {
   status: string;
 }
 
-const ReservasAnfitrion = () => {
-  const supabase = createClientComponentClient();
-  const [reservas, setReservas] = useState<Reserva[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [errorMsg, setErrorMsg] = useState('');
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+)
+
+export default function ReservasAnfitrion() {
+  const [reservas, setReservas] = useState<Reserva[]>([])
+  const [loading, setLoading] = useState(true)
+  const [errorMsg, setErrorMsg] = useState('')
+  const router = useRouter()
 
   useEffect(() => {
     const fetchReservas = async () => {
-      setLoading(true);
-      setErrorMsg('');
-
-      const {
-        data: { user },
-        error: userError,
-      } = await supabase.auth.getUser();
-
-      if (userError || !user) {
-        console.error('Error al obtener usuario:', userError);
-        setErrorMsg('No se pudo obtener el usuario. Intenta iniciar sesión de nuevo.');
-        setLoading(false);
-        return;
+      const { data: userData, error: userError } = await supabase.auth.getUser()
+      if (userError || !userData?.user) {
+        router.push('/login')
+        return
       }
 
       const { data, error } = await supabase.rpc('get_reservas_anfitrion', {
-        anfitrion_id_param: user.id,
-      });
+        anfitrion_id_param: userData.user.id,
+      })
 
       if (error) {
-        console.error('Error al obtener las reservas del anfitrión:', error);
-        setErrorMsg('Hubo un problema al cargar tus reservas. Intenta de nuevo más tarde.');
+        console.error('Error al obtener reservas:', error)
+        setErrorMsg('No se pudieron cargar las reservas.')
       } else {
-        setReservas(data || []);
+        setReservas(data || [])
       }
 
-      setLoading(false);
-    };
+      setLoading(false)
+    }
 
-    fetchReservas();
-  }, [supabase]);
+    fetchReservas()
+  }, [router])
 
   return (
-    <div className="min-h-screen bg-[#E0CFAA]">
+    <div className="min-h-screen bg-[#c18f54]">
       <Navbar />
-      <h1 className="text-5xl font-serif mb-8 text-[#191919] px-10 pt-10">
-        RESERVAS EN TUS TERRAZAS
+
+      <h1 className="text-5xl md:text-4xl font-serif mb-8 text-[#2D2429] px-10 mt-6">
+        RESERVAS EN MIS TERRAZAS
       </h1>
 
-      <div className="flex flex-wrap justify-center gap-8 px-4 mt-10">
+      <main className="flex justify-center items-center flex-wrap gap-6 mt-10 px-4">
         {loading ? (
-          <p className="text-white text-xl mt-20 animate-pulse">Cargando reservas...</p>
+          <p className="text-white text-xl">Cargando reservas...</p>
         ) : errorMsg ? (
-          <p className="text-red-700 text-lg mt-20">{errorMsg}</p>
+          <p className="text-red-600 text-xl">{errorMsg}</p>
         ) : reservas.length > 0 ? (
           reservas.map((reserva) => (
-            <div
-              key={reserva.id}
-              className="bg-[#B6A178] p-6 rounded-3xl shadow-xl max-w-sm w-full"
-            >
-              {reserva.image_url && (
+            <div key={reserva.id} className="bg-[#d4d2d5] w-96 rounded-2xl shadow-xl p-4">
+              {reserva.image_url ? (
                 <img
                   src={reserva.image_url}
                   alt={reserva.terraza_nombre}
-                  className="w-full h-48 object-cover rounded-2xl mb-4"
+                  className="terraza-image"
                 />
+              ) : (
+                <div className="terraza-placeholder">Sin imagen</div>
               )}
-              <h2 className="text-2xl font-bold text-[#5A3825] mb-2">
-                {reserva.terraza_nombre}
-              </h2>
-              <p className="text-[#794645] mb-1">
+              <h2 className="text-lg font-semibold text-[#794645]">{reserva.terraza_nombre}</h2>
+              <p className="text-[#794645]">
                 Fecha:{' '}
                 {new Intl.DateTimeFormat('es-MX', {
                   day: 'numeric',
@@ -93,26 +88,24 @@ const ReservasAnfitrion = () => {
                   timeZone: 'UTC',
                 }).format(new Date(reserva.reservation_date + 'T00:00:00Z'))}
               </p>
-              <p className="text-[#794645] mb-1">
+              <p className="text-[#794645]">
                 Monto: ${reserva.amount?.toLocaleString('es-MX', { minimumFractionDigits: 2 })} MXN
               </p>
-              <p className="text-[#794645] mb-1">
+              <p className="text-[#794645]">
                 Cliente: {reserva.cliente_nombre ?? 'Desconocido'}
               </p>
-              <p className="text-[#794645] mb-2">
+              <p className="text-[#794645]">
                 Contacto: {reserva.cliente_contacto ?? 'No disponible'}
               </p>
-              <p className="text-sm text-white bg-[#7B5E3C] rounded px-2 py-1 inline-block">
+              <p className="text-sm text-white bg-[#7B5E3C] rounded px-2 py-1 inline-block mt-2">
                 Estado: {reserva.status ?? 'Desconocido'}
               </p>
             </div>
           ))
         ) : (
-          <p className="text-white text-lg mt-20">Aún no tienes reservas en tus terrazas.</p>
+          <p className="text-white text-xl">Aún no tienes reservas en tus terrazas.</p>
         )}
-      </div>
+      </main>
     </div>
-  );
-};
-
-export default ReservasAnfitrion;
+  )
+}

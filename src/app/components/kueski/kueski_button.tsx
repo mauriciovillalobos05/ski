@@ -32,22 +32,47 @@ const Kueski_button = ({
 
     const fechaISO = selectedDate.toISOString().split("T")[0];
 
-    const { data: disponibilidad, error: checkError } = await supabase
+    // Paso 1: Verificar si ya existe una entrada para esa terraza y fecha
+    const { data: existingAvailability, error: existingError } = await supabase
       .from("terraza_availability")
-      .select("*")
+      .select("status")
       .eq("terraza_id", terraza.id)
-      .eq("available_date", fechaISO);
+      .eq("available_date", fechaISO)
+      .single();
 
-    if (checkError) {
+    if (existingError && existingError.code !== "PGRST116") {
       alert("Error al verificar disponibilidad.");
       return;
     }
 
-    if (disponibilidad.length > 0) {
+    // Paso 2: Solo hacer el upsert si no existe o si el status es 'rejected'
+    let availability;
+    if (!existingAvailability || existingAvailability.status === "rejected") {
+      const { data, error: availError } = await supabase
+        .from("terraza_availability")
+        .upsert(
+          {
+            terraza_id: terraza.id,
+            available_date: fechaISO,
+            status: "pending",
+          },
+          { onConflict: "terraza_id,available_date" }
+        )
+        .select()
+        .single();
+
+      if (availError) {
+        alert("No se pudo bloquear la fecha.");
+        return;
+      }
+
+      availability = data;
+    } else {
       alert("Esta fecha ya está reservada.");
       return;
     }
 
+    // Registrar la transacción
     const { data: transaccion, error: transError } = await supabase
       .from("transacciones")
       .insert({
@@ -65,21 +90,7 @@ const Kueski_button = ({
       return;
     }
 
-    const { data: availability, error: availError } = await supabase
-      .from("terraza_availability")
-      .insert({
-        terraza_id: terraza.id,
-        available_date: fechaISO,
-        status: "pending",
-      })
-      .select()
-      .single();
-
-    if (availError) {
-      alert("No se pudo bloquear la fecha.");
-      return;
-    }
-
+    // Llamar API interna para renombrar
     const response = await fetch("/api/rename", {
       method: "POST",
       headers: {

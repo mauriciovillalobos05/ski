@@ -39,14 +39,17 @@ const Reserva = () => {
         return;
       }
 
+      console.log('🧾 ID del usuario autenticado:', user.id);
+
       const { data, error } = await supabase.rpc('get_reservas_usuario', {
-        cliente_id_param: user.id, // ✅ nombre de parámetro corregido
+        cliente_id_param: user.id,
       });
 
       if (error) {
-        console.error('Error al obtener las reservas:', error);
+        console.error('❌ Error al obtener las reservas:', error);
         setErrorMsg('Hubo un problema al cargar tus reservas. Intenta de nuevo más tarde.');
       } else {
+        console.log('📦 Reservas obtenidas:', data);
         setReservas(data || []);
       }
 
@@ -91,7 +94,7 @@ const Reserva = () => {
                   month: 'long',
                   year: 'numeric',
                   timeZone: 'UTC',
-                }).format(new Date(reserva.reservation_date + 'T00:00:00Z'))}
+                }).format(new Date(reserva.reservation_date))}
               </p>
               <p className="text-[#794645] mb-1">
                 Monto: ${reserva.amount?.toLocaleString('es-MX', { minimumFractionDigits: 2 })} MXN
