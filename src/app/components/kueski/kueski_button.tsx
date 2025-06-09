@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+
 interface Terraza {
   id: string;
   name: string;
@@ -31,7 +32,6 @@ const Kueski_button = ({
 
     const fechaISO = selectedDate.toISOString().split("T")[0];
 
-    // Verificar si ya está bloqueada (doble validación por seguridad)
     const { data: disponibilidad, error: checkError } = await supabase
       .from("terraza_availability")
       .select("*")
@@ -48,7 +48,6 @@ const Kueski_button = ({
       return;
     }
 
-    // Insertar transacción
     const { data: transaccion, error: transError } = await supabase
       .from("transacciones")
       .insert({
@@ -66,14 +65,15 @@ const Kueski_button = ({
       return;
     }
 
-    // Bloquear la fecha en disponibilidad
-    const { error: availError } = await supabase
+    const { data: availability, error: availError } = await supabase
       .from("terraza_availability")
       .insert({
         terraza_id: terraza.id,
         available_date: fechaISO,
         status: "pending",
-      });
+      })
+      .select()
+      .single();
 
     if (availError) {
       alert("No se pudo bloquear la fecha.");
@@ -87,6 +87,7 @@ const Kueski_button = ({
       },
       body: JSON.stringify({
         transactionId: transaccion.id,
+        availabilityId: availability.id, // 👈 Se pasa availabilityId
         name: user.user_metadata.full_name || "Usuario",
         email: user.email,
         phone: user.user_metadata.phone || "0000000000",
@@ -96,7 +97,6 @@ const Kueski_button = ({
     const result = await response.json();
 
     if (result.status === "success") {
-      console.log(result.data.callback_url);
       await fetch("/api/sendEmail", {
         method: "POST",
         headers: {
@@ -115,7 +115,7 @@ const Kueski_button = ({
       });
 
       router.push(
-        `/kueski_redireccion?status=success&transaccion_id=${transaccion.id}`
+        `/kueski_redireccion?status=success&transaccion_id=${transaccion.id}&terraza_availability_id=${availability.id}`
       );
     } else {
       alert("Error en la conexión con Kueski.");

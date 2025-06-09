@@ -1,3 +1,4 @@
+// app/success/page.tsx
 "use client";
 
 import { useEffect, useState } from "react";
@@ -8,16 +9,15 @@ import Navbar from "../components/Navbar";
 export default function Success() {
   const [fecha, setFecha] = useState<string | null>(null);
   const [monto, setMonto] = useState<number | null>(null);
-
   const searchParams = useSearchParams();
   const supabase = createClientComponentClient();
 
   useEffect(() => {
     const fetchData = async () => {
-      if (!searchParams) return;
+      const transaccionId = searchParams!.get("transaccion_id");
+      const terrazaId = searchParams!.get("terraza_availability_id");
 
-      const transaccionId = searchParams.get("transaccion_id");
-      if (!transaccionId) return;
+      if (!transaccionId || !terrazaId) return;
 
       const { data, error } = await supabase
         .from("transacciones")
@@ -29,23 +29,31 @@ export default function Success() {
         setFecha(data.reservation_date);
         setMonto(data.amount);
       }
+
+      // Actualizar estados
+      await supabase
+        .from("transacciones")
+        .update({ status: "approved" })
+        .eq("id", transaccionId);
+
+      await supabase
+        .from("terraza_availability")
+        .update({ status: "confirmed" })
+        .eq("terraza_id", terrazaId)
+        .eq("available_date", data?.reservation_date);
     };
 
     fetchData();
   }, [searchParams]);
 
   if (!fecha || !monto) {
-    return (
-      <p className="text-center p-6">Cargando detalles de la reserva...</p>
-    );
+    return <p className="text-center p-6">Cargando detalles de la reserva...</p>;
   }
 
-  const [year, month, day] = fecha.split("-").map(Number);
-  const fechaLocal = new Date(year, month - 1, day);
-  const fechaFormateada = fechaLocal.toLocaleDateString("es-MX", {
+  const fechaFormateada = new Date(fecha).toLocaleDateString("es-MX", {
     day: "numeric",
     month: "long",
-    year: "numeric",
+    year: "numeric"
   });
 
   return (
@@ -55,13 +63,10 @@ export default function Success() {
         <h1 className="text-3xl font-bold text-black mb-6">
           Confirmación de tu reserva
         </h1>
-
         <p className="text-2xl font-bold text-white mb-4">${monto}</p>
-
         <p className="text-lg text-white font-semibold mb-4">
           Fecha de la reservación: {fechaFormateada}
         </p>
-
         <div className="mt-8">
           <button
             onClick={() => (window.location.href = "/")}
