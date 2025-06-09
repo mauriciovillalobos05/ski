@@ -1,3 +1,4 @@
+// app/reject/page.tsx
 "use client";
 
 import { useEffect } from "react";
@@ -14,46 +15,51 @@ export default function Reject() {
       const transaccionId = searchParams?.get("transaccion_id");
       const terrazaId = searchParams?.get("terraza_availability_id");
 
-      console.log("transaccionId:", transaccionId);
-      console.log("terrazaId:", terrazaId);
+      if (!transaccionId || !terrazaId) return;
 
-      if (!transaccionId || !terrazaId) {
-        console.warn("Faltan parámetros.");
-        return;
-      }
-
-      const { data: transaccion, error: error1 } = await supabase
+      const { data: transaccion, error: fetchError } = await supabase
         .from("transacciones")
         .select("reservation_date")
         .eq("id", transaccionId)
         .single();
 
-      if (error1 || !transaccion) {
-        console.error("Error obteniendo transacción:", error1);
+      if (fetchError || !transaccion) {
+        console.error("Error obteniendo transacción:", fetchError);
         return;
       }
 
-      const { error: error2 } = await supabase
+      const { error: errorTransaccion } = await supabase
         .from("transacciones")
         .update({ status: "rejected" })
         .eq("id", transaccionId);
 
-      if (error2) {
-        console.error("Error actualizando transacción:", error2);
+      if (errorTransaccion) {
+        console.error("Error actualizando transacción:", errorTransaccion);
       } else {
         console.log("Transacción actualizada correctamente.");
       }
 
-      const { error: error3 } = await supabase
+      const { data: disponibilidad } = await supabase
         .from("terraza_availability")
-        .update({ status: "rejected" })
+        .select("status")
         .eq("terraza_id", terrazaId)
-        .eq("available_date", transaccion.reservation_date);
+        .eq("available_date", transaccion.reservation_date)
+        .maybeSingle();
 
-      if (error3) {
-        console.error("Error actualizando terraza_availability:", error3);
+      if (disponibilidad) {
+        const { error: errorDisponibilidad } = await supabase
+          .from("terraza_availability")
+          .update({ status: "rejected" })
+          .eq("terraza_id", terrazaId)
+          .eq("available_date", transaccion.reservation_date);
+
+        if (errorDisponibilidad) {
+          console.error("Error actualizando disponibilidad:", errorDisponibilidad);
+        } else {
+          console.log("Disponibilidad actualizada correctamente.");
+        }
       } else {
-        console.log("Terraza_availability actualizada correctamente.");
+        console.warn("No se encontró la disponibilidad para actualizar.");
       }
     };
 
