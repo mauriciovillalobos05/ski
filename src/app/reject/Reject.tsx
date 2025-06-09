@@ -1,4 +1,3 @@
-// app/reject/page.tsx
 "use client";
 
 import { useEffect } from "react";
@@ -12,27 +11,50 @@ export default function Reject() {
 
   useEffect(() => {
     const updateStates = async () => {
-      const transaccionId = searchParams!.get("transaccion_id");
-      const terrazaId = searchParams!.get("terraza_availability_id");
+      const transaccionId = searchParams?.get("transaccion_id");
+      const terrazaId = searchParams?.get("terraza_availability_id");
 
-      if (!transaccionId || !terrazaId) return;
+      console.log("transaccionId:", transaccionId);
+      console.log("terrazaId:", terrazaId);
 
-      const { data } = await supabase
+      if (!transaccionId || !terrazaId) {
+        console.warn("Faltan parámetros.");
+        return;
+      }
+
+      const { data: transaccion, error: error1 } = await supabase
         .from("transacciones")
         .select("reservation_date")
         .eq("id", transaccionId)
         .single();
 
-      await supabase
+      if (error1 || !transaccion) {
+        console.error("Error obteniendo transacción:", error1);
+        return;
+      }
+
+      const { error: error2 } = await supabase
         .from("transacciones")
         .update({ status: "rejected" })
         .eq("id", transaccionId);
 
-      await supabase
+      if (error2) {
+        console.error("Error actualizando transacción:", error2);
+      } else {
+        console.log("Transacción actualizada correctamente.");
+      }
+
+      const { error: error3 } = await supabase
         .from("terraza_availability")
         .update({ status: "rejected" })
         .eq("terraza_id", terrazaId)
-        .eq("available_date", data?.reservation_date);
+        .eq("available_date", transaccion.reservation_date);
+
+      if (error3) {
+        console.error("Error actualizando terraza_availability:", error3);
+      } else {
+        console.log("Terraza_availability actualizada correctamente.");
+      }
     };
 
     updateStates();
