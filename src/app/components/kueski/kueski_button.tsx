@@ -72,6 +72,7 @@ const Kueski_button = ({
       .insert({
         terraza_id: terraza.id,
         available_date: fechaISO,
+        status: "pending",
       });
 
     if (availError) {
@@ -95,7 +96,7 @@ const Kueski_button = ({
     const result = await response.json();
 
     if (result.status === "success") {
-      console.log(result.data.callback_url)
+      console.log(result.data.callback_url);
       await fetch("/api/sendEmail", {
         method: "POST",
         headers: {
@@ -112,8 +113,10 @@ const Kueski_button = ({
           callback_url: result.data.callback_url,
         }),
       });
-      
-      router.push(`/kueski_redireccion?status=success&transaccion_id=${transaccion.id}`)
+
+      router.push(
+        `/kueski_redireccion?status=success&transaccion_id=${transaccion.id}`
+      );
     } else {
       alert("Error en la conexión con Kueski.");
     }
