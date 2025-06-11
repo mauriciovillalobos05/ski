@@ -33,21 +33,32 @@ const KueskiRedirectionPage = () => {
   }, [searchParams, supabase]);
 
   const status = searchParams?.get("status");
+  const isSuccess = status === 'success';
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-[#f0e8e8] text-[#794645]">
-      <Navbar />
-      <h1 className="text-4xl font-bold mb-4">Kueski Pay (Revisa tu correo)</h1>
-      <p className="text-xl">
-        Estado del pago:{' '}
-        <strong>{status === 'success' ? 'Éxito' : 'Fallido'}</strong>
-      </p>
-      <div className="flex justify-center items-center mb-6">
-        <img
-          src="/CactusJack.png"
-          alt="CactusJack logo"
-          className="h-55 object-contain"
-        />
+    <div className="min-h-screen bg-[#fdf6e3] flex flex-col">
+      {/* Navbar full width */}
+      <div className="w-full">
+        <Navbar/>
+      </div>
+
+      {/* Main content */}
+      <div className="flex-grow flex items-center justify-center px-4">
+        <div className="bg-white rounded-2xl shadow-2xl p-10 text-center max-w-md w-full border border-[#e0d7c5]">
+          <h1 className="text-4xl font-extrabold text-[#c18f54] mb-4">Kueski Pay</h1>
+          <p className="text-lg text-gray-700 mb-4"><b>Revisa tu correo para proceder con el pago.</b></p>
+          <p className="text-2xl font-semibold mb-6">
+            Estado de la solicitud de pago:{' '}
+            <span className={isSuccess ? 'text-green-600' : 'text-red-600'}>
+              {isSuccess ? '✅ Éxito' : '❌ Rechazado'}
+            </span>
+          </p>
+          <img
+            src="/CactusJack.png"
+            alt="CactusJack logo"
+            className="h-48 mx-auto object-contain rounded-xl shadow-md"
+          />
+        </div>
       </div>
     </div>
   );
