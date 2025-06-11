@@ -1,4 +1,3 @@
-// app/success/page.tsx
 "use client";
 
 import { useEffect, useState } from "react";
@@ -20,9 +19,10 @@ export default function Success() {
 
       if (!transaccionId || !terrazaId) return;
 
+      // 1. Obtener la transacción actual
       const { data: transaccion, error: fetchError } = await supabase
         .from("transacciones")
-        .select("reservation_date, amount")
+        .select("reservation_date, amount, status")
         .eq("id", transaccionId)
         .single();
 
@@ -34,15 +34,19 @@ export default function Success() {
       setFecha(transaccion.reservation_date);
       setMonto(transaccion.amount);
 
-      const { error: errorTransaccion } = await supabase
-        .from("transacciones")
-        .update({ status: "approved" })
-        .eq("id", transaccionId);
+      // 2. Solo actualizamos si aún está en 'pending'
+      if (transaccion.status === "pending") {
+        const { error: errorTransaccion } = await supabase
+          .from("transacciones")
+          .update({ status: "approved" })
+          .eq("id", transaccionId);
 
-      if (errorTransaccion) {
-        console.error("Error actualizando transacción:", errorTransaccion);
+        if (errorTransaccion) {
+          console.error("Error actualizando transacción:", errorTransaccion);
+        }
       }
 
+      // 3. Confirmar disponibilidad solo si está en 'pending'
       const { data: disponibilidad } = await supabase
         .from("terraza_availability")
         .select("status")
@@ -50,7 +54,7 @@ export default function Success() {
         .eq("available_date", transaccion.reservation_date)
         .maybeSingle();
 
-      if (disponibilidad) {
+      if (disponibilidad && disponibilidad.status === "pending") {
         const { error: errorDisponibilidad } = await supabase
           .from("terraza_availability")
           .update({ status: "confirmed" })
@@ -61,7 +65,7 @@ export default function Success() {
           console.error("Error actualizando disponibilidad:", errorDisponibilidad);
         }
       } else {
-        console.warn("No se encontró la disponibilidad para actualizar.");
+        console.warn("No se encontró la disponibilidad o ya estaba confirmada.");
       }
     };
 
