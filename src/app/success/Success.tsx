@@ -81,21 +81,33 @@ export default function Success() {
   });
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#dcc9a2]">
-      <Navbar />
-      <div className="bg-[#b6996e] rounded-2xl p-10 w-[90%] max-w-xl shadow-md">
-        <h1 className="text-3xl font-bold text-black mb-6">Confirmación de tu reserva</h1>
-        <p className="text-2xl font-bold text-white mb-4">${monto}</p>
-        <p className="text-lg text-white font-semibold mb-4">
-          Fecha de la reservación: {fechaFormateada}
-        </p>
-        <div className="mt-8">
-          <button
-            onClick={() => (window.location.href = "/")}
-            className="bg-[#868b04] text-black font-semibold px-6 py-2 rounded-full hover:bg-[#6e7203] transition"
-          >
-            Continuar →
-          </button>
+    <div className="min-h-screen bg-[#dcc9a2] flex flex-col">
+      <div className="w-full shadow-lg bg-[#b6996e] z-10">
+        <Navbar />
+      </div>
+
+      <div className="flex-1 flex items-center justify-center px-4">
+        <div className="bg-[#b6996e] rounded-3xl p-10 w-full max-w-xl shadow-2xl border-4 border-[#ffffff30] backdrop-blur-sm">
+          <h1 className="text-4xl font-extrabold text-black mb-6 text-center drop-shadow-sm">
+            Confirmación de tu reserva
+          </h1>
+
+          <p className="text-3xl font-bold text-white mb-4 text-center">
+            ${monto}
+          </p>
+
+          <p className="text-lg text-white font-medium mb-6 text-center">
+            Fecha de la reservación: <span className="font-semibold">{fechaFormateada}</span>
+          </p>
+
+          <div className="mt-6 flex justify-center">
+            <button
+              onClick={() => (window.location.href = "/")}
+              className="bg-[#868b04] text-black font-semibold px-6 py-3 rounded-full hover:bg-[#6e7203] transition-all duration-300 shadow-md hover:shadow-lg"
+            >
+              Continuar →
+            </button>
+          </div>
         </div>
       </div>
     </div>

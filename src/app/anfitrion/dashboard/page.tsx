@@ -62,38 +62,49 @@ export default function AnfitrionDashboard() {
 
   return (
     <div className="min-h-screen bg-[#c18f54]">
-      <Navbar />
+      <div className="w-full shadow-md bg-[#d4aa7d]">
+        <Navbar />
+      </div>
 
-      <h1 className="text-5xl md:text-4xl font-serif mb-8 text-[#2D2429] px-10 mt-6">
+      <h1 className="text-5xl md:text-4xl font-serif mb-8 text-[#2D2429] px-10 mt-6 text-center">
         MIS TERRAZAS EN EL RODEO
       </h1>
 
-      <main className="flex justify-center items-center flex-wrap gap-6 mt-10 px-4">
+      <main className="flex justify-center items-start flex-wrap gap-6 mt-10 px-4">
         {loading ? (
           <p className="text-white text-xl">Cargando terrazas...</p>
         ) : terrazas.length > 0 ? (
           terrazas.map((terraza) => (
-            <div key={terraza.terraza_id} className="bg-[#d4d2d5] w-96 rounded-2xl shadow-xl p-4">
+            <div
+              key={terraza.terraza_id}
+              className="bg-[#d4d2d5] w-80 min-h-[460px] rounded-2xl shadow-xl p-4 flex flex-col justify-between"
+            >
               {terraza.image_url ? (
                 <img
-                  src={terraza.image_url} 
-                  alt={terraza.name} 
-                  className="terraza-image"
+                  src={terraza.image_url}
+                  alt={terraza.name}
+                  className="w-full h-48 object-cover rounded-xl mb-4"
                 />
               ) : (
-                <div className="terraza-placeholder">
+                <div className="w-full h-48 bg-[#ccc] flex items-center justify-center rounded-xl text-[#555] mb-4">
                   Sin imagen
                 </div>
               )}
-              <h2 className="text-lg font-semibold text-[#794645]">{terraza.name}</h2>
-              <p className="text-[#794645]">{terraza.description || 'Sin descripción'}</p>
-              <p className="text-[#794645]">${terraza.price} p/día</p>
-              <p className="text-sm font-semibold text-[#794645]">Anfitrión: {terraza.owner_name}</p>
-              <p className="text-sm font-semibold text-[#794645]">{terraza.owner_email}</p>
-              <div className="flex">
+
+              <div className="flex-1">
+                <h2 className="text-lg font-semibold text-[#794645] mb-1">{terraza.name}</h2>
+                <p className="text-[#794645] mb-1">{terraza.description || 'Sin descripción'}</p>
+                <p className="text-[#794645] mb-1">${terraza.price} p/día</p>
+                <p className="text-sm font-semibold text-[#794645] mb-1">
+                  Anfitrión: {terraza.owner_name}
+                </p>
+                <p className="text-sm font-semibold text-[#794645]">{terraza.owner_email}</p>
+              </div>
+
+              <div className="flex mt-4">
                 <Link
                   href={`/anfitrion/terraza/${terraza.terraza_id}`}
-                  className="ml-auto mt-4 bg-[#d29065] px-4 py-2 rounded-[20px] hover:opacity-90"
+                  className="ml-auto bg-[#d29065] px-4 py-2 rounded-[20px] hover:opacity-90"
                 >
                   <button>EDITAR</button>
                 </Link>
