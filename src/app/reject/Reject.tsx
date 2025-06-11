@@ -19,13 +19,20 @@ export default function Reject() {
 
       const { data: transaccion, error: fetchError } = await supabase
         .from("transacciones")
-        .select("reservation_date")
+        .select("reservation_date, status") // ← incluye status
         .eq("id", transaccionId)
         .single();
 
       if (fetchError || !transaccion) {
         console.error("Error obteniendo transacción:", fetchError);
         return;
+      }
+
+      if (transaccion.status === "approved") {
+        console.warn(
+          "La transacción ya está aprobada. No se puede marcar como rechazada."
+        );
+        return; // ❌ No sobrescribimos
       }
 
       const { error: errorTransaccion } = await supabase
@@ -54,7 +61,10 @@ export default function Reject() {
           .eq("available_date", transaccion.reservation_date);
 
         if (errorDisponibilidad) {
-          console.error("Error actualizando disponibilidad:", errorDisponibilidad);
+          console.error(
+            "Error actualizando disponibilidad:",
+            errorDisponibilidad
+          );
         } else {
           console.log("Disponibilidad actualizada correctamente.");
         }
