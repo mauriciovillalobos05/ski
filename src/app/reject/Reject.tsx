@@ -1,4 +1,3 @@
-// app/reject/page.tsx
 "use client";
 
 import { useEffect } from "react";
@@ -17,9 +16,10 @@ export default function Reject() {
 
       if (!transaccionId || !terrazaId) return;
 
+      // Obtener la fecha de la reserva
       const { data: transaccion, error: fetchError } = await supabase
         .from("transacciones")
-        .select("reservation_date, status") // ← incluye status
+        .select("reservation_date")
         .eq("id", transaccionId)
         .single();
 
@@ -28,13 +28,25 @@ export default function Reject() {
         return;
       }
 
-      if (transaccion.status === "approved") {
-        console.warn(
-          "La transacción ya está aprobada. No se puede marcar como rechazada."
-        );
-        return; // ❌ No sobrescribimos
+      // Consultar disponibilidad actual de la terraza
+      const { data: disponibilidad, error: errorDisponibilidadFetch } = await supabase
+        .from("terraza_availability")
+        .select("status")
+        .eq("terraza_id", terrazaId)
+        .eq("available_date", transaccion.reservation_date)
+        .maybeSingle();
+
+      if (errorDisponibilidadFetch || !disponibilidad) {
+        console.warn("No se encontró la disponibilidad para actualizar.");
+        return;
       }
 
+      if (disponibilidad.status === "confirmed") {
+        console.warn("La disponibilidad ya está aprobada. No se puede marcar como rechazada.");
+        return;
+      }
+
+      // Actualizar estado de transacción a 'rejected'
       const { error: errorTransaccion } = await supabase
         .from("transacciones")
         .update({ status: "rejected" })
@@ -46,30 +58,17 @@ export default function Reject() {
         console.log("Transacción actualizada correctamente.");
       }
 
-      const { data: disponibilidad } = await supabase
+      // Actualizar disponibilidad de terraza a 'rejected'
+      const { error: errorDisponibilidadUpdate } = await supabase
         .from("terraza_availability")
-        .select("status")
+        .update({ status: "rejected" })
         .eq("terraza_id", terrazaId)
-        .eq("available_date", transaccion.reservation_date)
-        .maybeSingle();
+        .eq("available_date", transaccion.reservation_date);
 
-      if (disponibilidad) {
-        const { error: errorDisponibilidad } = await supabase
-          .from("terraza_availability")
-          .update({ status: "rejected" })
-          .eq("terraza_id", terrazaId)
-          .eq("available_date", transaccion.reservation_date);
-
-        if (errorDisponibilidad) {
-          console.error(
-            "Error actualizando disponibilidad:",
-            errorDisponibilidad
-          );
-        } else {
-          console.log("Disponibilidad actualizada correctamente.");
-        }
+      if (errorDisponibilidadUpdate) {
+        console.error("Error actualizando disponibilidad:", errorDisponibilidadUpdate);
       } else {
-        console.warn("No se encontró la disponibilidad para actualizar.");
+        console.log("Disponibilidad actualizada correctamente.");
       }
     };
 
@@ -78,12 +77,12 @@ export default function Reject() {
 
   return (
     <div className="min-h-screen flex flex-col bg-[#e9d6ae]">
-      {/* Navbar arriba a lo largo */}
+      {/* Navbar */}
       <div className="w-full shadow-md bg-[#bfa576] z-10">
         <Navbar />
       </div>
 
-      {/* Contenido centrado */}
+      {/* Contenido principal */}
       <div className="flex-1 flex items-center justify-center px-4">
         <div className="bg-[#bfa576] rounded-3xl p-10 w-full max-w-xl shadow-2xl border-4 border-[#ffffff20] backdrop-blur-sm text-center">
           <h1 className="text-4xl font-extrabold text-black mb-6 drop-shadow-sm">
