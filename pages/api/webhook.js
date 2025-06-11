@@ -48,48 +48,6 @@ export default async function handler(req, res) {
 
     console.log("Transacción:", order_id, "Estado:", newStatus);
 
-    // 1. Actualizar transacción
-    const { data: txData, error: dbError } = await supabase
-      .from("transacciones")
-      .update({
-        payment_id,
-        status: newStatus,
-        status_reason,
-      })
-      .eq("id", order_id)
-      .select()
-      .single();
-
-    if (dbError) throw new Error(dbError.message);
-
-    // 2. Actualizar disponibilidad si aplica
-    if (txData?.terraza_id && txData?.reservation_date) {
-      let availabilityStatus;
-
-      if (newStatus === "approved") {
-        availabilityStatus = "confirmed";
-      } else if (["canceled", "failed", "rejected", "denied"].includes(newStatus)) {
-        availabilityStatus = "rejected";
-      } else {
-        availabilityStatus = "pending"; // fallback
-      }
-
-      const { error: upsertError } = await supabase
-        .from("terraza_availability")
-        .upsert(
-          {
-            terraza_id: txData.terraza_id,
-            available_date: txData.reservation_date,
-            status: availabilityStatus,
-          },
-          { onConflict: ["terraza_id", "available_date"] }
-        );
-
-      if (upsertError) {
-        console.error("Error al hacer upsert en terraza_availability:", upsertError.message);
-      }
-    }
-
     // 3. Firmar respuesta
     const nowSec = Math.floor(Date.now() / 1000);
     const iat = nowSec;
