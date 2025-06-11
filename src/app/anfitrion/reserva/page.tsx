@@ -54,7 +54,7 @@ export default function ReservasAnfitrion() {
   }, [router])
 
   return (
-    <div className="min-h-screen bg-[#c18f54]">
+    <div className="min-h-screen bg-[#E0CFAA]">
       <Navbar />
 
       <h1 className="text-5xl md:text-4xl font-serif mb-8 text-[#2D2429] px-10 mt-6">
@@ -103,7 +103,7 @@ export default function ReservasAnfitrion() {
             </div>
           ))
         ) : (
-          <p className="text-white text-xl">Aún no tienes reservas en tus terrazas.</p>
+          <p className="text-5xl md:text-4xl font-serif mb-8 text-[#2D2429] px-10 mt-6">Aún no tienes reservas en tus terrazas.</p>
         )}
       </main>
     </div>
